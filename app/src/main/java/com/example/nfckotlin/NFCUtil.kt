@@ -18,7 +18,12 @@ object NFCUtil {
     fun createNFCMessage(payload: String, intent: Intent?, context: Context): Boolean {
 
         val pathPrefix = "peterjohnwelcome.com:nfcapp"
-        val nfcRecord = NdefRecord(NdefRecord.TNF_EXTERNAL_TYPE, pathPrefix.toByteArray(), ByteArray(0), payload.toByteArray())
+        val nfcRecord = NdefRecord(
+            NdefRecord.TNF_EXTERNAL_TYPE,
+            pathPrefix.toByteArray(),
+            ByteArray(0),
+            payload.toByteArray()
+        )
         val nfcMessage = NdefMessage(arrayOf(nfcRecord))
         intent?.let {
             val tag = it.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG)
@@ -35,21 +40,21 @@ object NFCUtil {
             nDefTag?.let {
                 it.connect()
                 if (it.maxSize < nfcMessage.toByteArray().size) {
-                    //Message to large to write to NFC tag
+                    // Message too large to write to NFC tag
                     return false
                 }
-                if (it.isWritable) {
+                return if (it.isWritable) {
                     it.writeNdefMessage(nfcMessage)
                     it.close()
-                    //Message is written to tag
+                    // Message is written to tag
                     Toast.makeText(context, "Message written", Toast.LENGTH_LONG).show()
 
-                    return true
+                    true
                 } else {
-                    //NFC tag is read-only
+                    // NFC tag is read-only
                     Toast.makeText(context, "Tag is read only", Toast.LENGTH_LONG).show()
 
-                    return false
+                    false
                 }
             }
 
@@ -60,37 +65,42 @@ object NFCUtil {
                     it.connect()
                     it.format(nfcMessage)
                     it.close()
-                    //The data is written to the tag
+                    // The data is written to the tag
                     Toast.makeText(context, "Message written", Toast.LENGTH_LONG).show()
 
                     return true
                 } catch (e: IOException) {
-                    //Failed to format tag
+                    // Failed to format tag
                     Toast.makeText(context, "Failed to format tag", Toast.LENGTH_LONG).show()
 
                     return false
                 }
             }
-            //NDEF is not supported
+            // NDEF is not supported
             Toast.makeText(context, "NDEF is not supported", Toast.LENGTH_LONG).show()
 
             return false
 
         } catch (e: Exception) {
-            //Write operation has failed
+            // Write operation has failed
         }
         return false
     }
 
     fun <T> enableNFCInForeground(nfcAdapter: NfcAdapter, activity: Activity, classType: Class<T>) {
-        val pendingIntent = PendingIntent.getActivity(activity, 0,
-            Intent(activity, classType).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0)
+        val pendingIntent = PendingIntent.getActivity(
+            activity, 0,
+            Intent(activity, classType).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0
+        )
         val nfcIntentFilter = IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED)
         val filters = arrayOf(nfcIntentFilter)
 
-        val TechLists = arrayOf(arrayOf(Ndef::class.java.name), arrayOf(NdefFormatable::class.java.name))
+        val arrayOf: Array<String> = arrayOf(Ndef::class.java.name)
+        val arrayOf1: Array<String> = arrayOf(NdefFormatable::class.java.name)
+        val techLists: Array<Array<String>> =
+            arrayOf(arrayOf, arrayOf1)
 
-        nfcAdapter.enableForegroundDispatch(activity, pendingIntent, filters, TechLists)
+        nfcAdapter.enableForegroundDispatch(activity, pendingIntent, filters, techLists)
     }
 
     fun disableNFCInForeground(nfcAdapter: NfcAdapter, activity: Activity) {

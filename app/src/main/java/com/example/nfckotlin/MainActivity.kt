@@ -29,13 +29,19 @@ class MainActivity : AppCompatActivity() {
 
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
+        var car = Car(color = "Red", weight = 900, topSpeed = 300)
+        car.let {
+            it.color = "Blue"
+            it.topSpeed = 200
+        }
+
 
     }
 
     override fun onResume() {
         super.onResume()
         mNfcAdapter?.let {
-            NFCUtil.enableNFCInForeground(it, this, javaClass)
+            NFCUtilJava.enableNFCInForeground(it, this, javaClass)
         }
 
     }
@@ -43,7 +49,7 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         mNfcAdapter?.let {
-            NFCUtil.disableNFCInForeground(it, this)
+            NFCUtilJava.disableNFCInForeground(it, this)
         }
     }
 
@@ -52,7 +58,7 @@ class MainActivity : AppCompatActivity() {
         tagContentTextView.text = getPayload(intent)
         writeButtton.setOnClickListener {
             val messageWrittenSuccessfully =
-                NFCUtil.createNFCMessage(messageEditText.text.toString(), intent, this)
+                NFCUtilJava.createNFCMessage(messageEditText.text.toString(), intent, this)
             resultTextView.text = ifElse(
                 messageWrittenSuccessfully,
                 "Successful Written to Tag",
