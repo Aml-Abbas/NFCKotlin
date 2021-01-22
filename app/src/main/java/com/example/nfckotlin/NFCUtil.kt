@@ -97,7 +97,7 @@ object NFCUtil {
         nfcAdapter.disableForegroundDispatch(activity)
     }
 
-    private fun getNDefMessages(intent: Intent): Array<NdefMessage> {
+    fun getNDefMessages(intent: Intent): Array<NdefMessage> {
 
         val rawMessage = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
         rawMessage?.let {

@@ -12,10 +12,13 @@ import android.nfc.NdefRecord
 import android.nfc.Tag
 import android.nfc.tech.Ndef
 import android.nfc.tech.NdefFormatable
+import android.os.Parcelable
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.IOException
+import kotlin.text.Charsets.US_ASCII
+import kotlin.text.Charsets.UTF_8
 
 
 class MainActivity : AppCompatActivity() {
@@ -26,15 +29,6 @@ class MainActivity : AppCompatActivity() {
 
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
-        writeButtton.setOnClickListener {
-            val messageWrittenSuccessfully =
-                NFCUtil.createNFCMessage(messageEditText.text.toString(), intent, this)
-            resultTextView.text = ifElse(
-                messageWrittenSuccessfully,
-                "Successful Written to Tag",
-                "Something went wrong Try Again"
-            )
-        }
 
     }
 
@@ -55,7 +49,41 @@ class MainActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        tagContentTextView.text = NFCUtil.retrieveNFCMessage(this.intent)
+        tagContentTextView.text = getPayload(intent)
+        writeButtton.setOnClickListener {
+            val messageWrittenSuccessfully =
+                NFCUtil.createNFCMessage(messageEditText.text.toString(), intent, this)
+            resultTextView.text = ifElse(
+                messageWrittenSuccessfully,
+                "Successful Written to Tag",
+                "Something went wrong Try Again"
+            )
+        }
+
+    }
+
+    fun getPayload(intent: Intent?): String {
+        val parcelabels: Array<Parcelable>? =
+            intent?.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
+        var string = ""
+        if (parcelabels != null && parcelabels.isNotEmpty()) {
+            val ndefMessage = parcelabels[0] as NdefMessage
+
+            string = String(ndefMessage.records[0].payload, UTF_8)
+        } else {
+            string = "No NDEF messages found"
+        }
+        return string
+    }
+
+    fun readTextFromMessage(ndefMessage: NdefMessage): String {
+        val ndefRecords = ndefMessage.records
+        val tagContent = ""
+        if (ndefRecords != null && ndefRecords.isNotEmpty()) {
+            val record = ndefRecords[0];
+
+        }
+        return tagContent;
     }
 
 
